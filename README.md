@@ -1,50 +1,74 @@
-# Book Byen: bedre "Tider"
+# Book Byen: en bedre oversigt over dine tider
 
-Brugerscript til [Book Byen](https://www.bookbyen.brnd.com/) (Københavns Kommunes bookingsystem for baner og
-lokaler), der gør siden **Tider** (`/tider`, mine bookinger) til at bruge:
+Et brugerscript til [Book Byen](https://www.bookbyen.brnd.com/), Københavns Kommunes bookingsystem for baner og
+lokaler. Det gør siden **Tider**, hvor du ser dine bookinger, langt nemmere at overskue: kolonnerne kan sorteres,
+bookingerne er farvet efter ugedag og bane, og du kan med det samme se, hvilke faste tider der kan fornyes.
 
-- **Sortering:** klik på en kolonneoverskrift for at sortere (klik igen for omvendt). Valget huskes.
-  Standard er ugedag, så tid, bane og dato, så hver fast tid står samlet.
-- **Farver:** én farve pr. ugedag (tirsdag blå, søndag grøn, mandag orange …) og en nuance pr. bane, så fx
-  søndag bane A altid har samme farve. Afviste bookinger er grå og overstreget.
-- **Ugedag** som ny kolonne, **banen** i kort form ("Squash A" i stedet for "Squash (Squash - Opdelt) - Squash A"),
-  og **datoerne** som "27. okt – 17. nov" med antal uger.
-- **Ingen vandret scroll:** kolonner, der aldrig siger noget (Booket af, Aktivitet, den tomme Dato, og Anlæg,
-  når alle er det samme sted), er skjult.
-- **Knapperne fremme:** "Rediger" og "Forny" står direkte i rækken i stedet for i menuen ude til højre. "Forny" er
-  fremhævet, så det er tydeligt, hvilke tider der kan fornyes.
-- **Virker Forny?** Book Byen viser "Dette link er udløbet" for nogle fornyelser. Scriptet henter fornyelsessiden i
-  baggrunden (kun visning, intet bookes): virker den, står der fx "Forny til 30. mar" med periode og pris, når
-  musen holdes over knappen; ellers er knappen grå og hedder "Kan ikke fornys". Svaret huskes et kvarter i fanen.
-- Alle rækker vises på én side.
+Scriptet er lavet af en bruger og har ingen forbindelse til Københavns Kommune.
 
-Scriptet ændrer kun visningen i min egen browser. Det sender intet og klikker ikke på noget af sig selv; knapperne
-gør det samme som menupunkterne.
+## Hvad scriptet gør
+
+**Sortering.** Klik på en kolonneoverskrift for at sortere efter den, og klik igen for at vende rækkefølgen.
+Valget bliver husket. Som standard sorteres der efter ugedag, tid, bane og dato, så hver fast tid står samlet.
+
+**Farver.** Hver ugedag har sin egen farve (fx tirsdag blå og søndag grøn), og hver bane har sin egen nuance af
+den. Søndag bane A har altså altid samme farve. Afviste bookinger er grå og overstreget.
+
+**Mere læsevenlig tabel.**
+
+- En ny kolonne viser ugedagen.
+- Banen står i kort form, fx "Squash A" i stedet for "Squash (Squash - Opdelt) - Squash A".
+- Datoerne står som "27. okt – 17. nov" med antal uger nedenunder.
+- Kolonner, der ikke siger noget nyt, er skjult: Booket af, Aktivitet, den tomme Dato og Anlæg, når alle
+  bookinger er samme sted. Tabellen kan derfor ses uden at scrolle til siden.
+- Alle bookinger vises på én side.
+
+**Knapperne direkte i rækken.** "Rediger" og "Forny" står som knapper i hver række i stedet for at være gemt i en
+menu yderst til højre.
+
+**Kan tiden fornyes?** For nogle faste tider svarer Book Byen "Dette link er udløbet", når man trykker på
+"Forny fast banetid". Scriptet åbner fornyelsessiden i baggrunden og viser resultatet på knappen:
+
+- Virker fornyelsen, hedder knappen fx **"Forny til 30. mar"**. Hold musen over knappen for at se perioden og prisen.
+- Virker den ikke, er knappen grå og hedder **"Kan ikke fornys"**.
+
+Resultatet huskes i et kvarter, så siden ikke hentes igen, hver gang du genindlæser.
+
+### Hvad scriptet ikke gør
+
+Scriptet ændrer kun, hvordan siden ser ud i din egen browser. Det booker, fornyer og betaler ikke noget. Når
+det tjekker en fornyelse, åbner det kun siden, ligesom hvis du selv havde trykket på linket, men det trykker
+ikke på "Book". Knapperne gør præcis det samme som punkterne i Book Byens egen menu.
 
 ## Installation
 
-1. Installér [Tampermonkey](https://www.tampermonkey.net/) i Chrome (eller Violentmonkey). I Chrome og Edge skal
-   "Tillad brugerscripts" være slået til under udvidelsens detaljer.
-2. Åbn **[installationslinket](https://raw.githubusercontent.com/kekwin/bookbyen-userscript/main/bookbyen-tider.user.js)**
-   og tryk "Installér" i Tampermonkey.
-3. Gå til Book Byen, log ind og åbn **Tider**.
+1. Installér udvidelsen [Tampermonkey](https://www.tampermonkey.net/) i din browser (Violentmonkey virker også).
+   I Chrome og Edge skal du desuden slå **Tillad brugerscripts** til under udvidelsens detaljer.
+2. Åbn **[installationslinket](https://raw.githubusercontent.com/kekwin/bookbyen-userscript/main/bookbyen-tider.user.js)**,
+   og tryk på **Installér** i Tampermonkey.
+3. Gå til Book Byen, log ind, og åbn **Tider**.
 
-Tampermonkey tjekker selv for opdateringer (samme adresse). En ny version skal have et højere `@version` i
-scriptets hoved; ellers henter Tampermonkey den ikke.
+Tampermonkey holder selv scriptet opdateret.
 
-## Sådan virker det
+## Til udviklere
 
-Book Byen henter tabellen med AJAX (`POST /TiderBooking/GetBookingList`, server-renderet HTML med alle rækker),
-så scriptet holder øje med siden og forbedrer tabellen `#tiderbookinglisttbl`, hver gang den bliver tegnet.
-Cellerne genkendes på deres `data-label` (fx `BookingDate`, `disp`, `Bookingtime`); ændrer Book Byen dem, skal
-scriptet rettes. Ugedagen regnes ud fra første dato.
+Book Byen henter tabellen med AJAX (`POST /TiderBooking/GetBookingList`, som svarer med server-renderet HTML med
+alle rækker). Scriptet holder derfor øje med siden og forbedrer tabellen `#tiderbookinglisttbl`, hver gang den
+bliver tegnet. Cellerne genkendes på deres `data-label` (fx `BookingDate`, `disp` og `Bookingtime`). Ændrer Book
+Byen dem, skal scriptet rettes. Ugedagen regnes ud fra den første dato i perioden.
 
-Farver: grundfarven (hue) pr. ugedag står i `HUES`; banen drejer farven 20° og gør den lidt mørkere pr. bogstav
-(A, B, C …) eller nummer.
+En fornyelse regnes for at virke, når fornyelsessiden indeholder tider, der kan bookes (`clsCHKMultiBooking`).
+Periode, pris og ledighed læses fra den første af dem. Teksten "udløbet" kan ikke bruges, fordi den også står i
+en skjult dialog om udløbet session på alle sider.
+
+Farverne: grundfarven pr. ugedag står i `HUES`. For hver bane (A, B, C … eller 1, 2, 3 …) drejes farven 20° og
+bliver lidt mørkere.
+
+En ny version skal have et højere `@version` i scriptets hoved; ellers henter Tampermonkey den ikke.
 
 ## Historik
 
-- 1.1.0 (16. oktober 2026): Forny-knappen tjekker, om linket virker, og viser hvortil der fornyes; datoer som
-  "30. mar".
-- 1.0.0 (16. oktober 2026): sortering, farver pr. ugedag og bane, ugedag, kort bane, antal uger, knapper i rækken,
-  ingen vandret scroll.
+- **1.1.0** (16. oktober 2026): Forny-knappen viser, om fornyelsen virker, og hvortil der fornyes. Datoer
+  skrives som "30. mar".
+- **1.0.0** (16. oktober 2026): Sortering, farver efter ugedag og bane, ugedag, kort banenavn, antal uger,
+  knapper i rækken og ingen vandret scroll.
