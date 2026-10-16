@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Book Byen: bedre "Tider"
 // @namespace    https://github.com/kekwin
-// @version      1.0.0
+// @version      1.1.0
 // @description  Sortérbare kolonner, farve pr. ugedag og bane, ugedag-kolonne, uden vandret scroll og med knapperne fremme på Book Byens "Tider"-side.
 // @match        https://www.bookbyen.brnd.com/tider*
 // @match        https://bookbyen.brnd.com/tider*
@@ -71,7 +71,8 @@
     return new Date(year, Number(m[2]) - 1, Number(m[1]));
   };
   const iso = (d) => (d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "");
-  const shortDate = (d) => d.toLocaleDateString("da-DK", { day: "numeric", month: "short" }).replace(".", "");
+  /** "30. mar" */
+  const shortDate = (d) => `${d.getDate()}. ${d.toLocaleDateString("da-DK", { month: "short" }).replace(/\./g, "")}`;
 
   const cellText = (row, label) => row.querySelector(`td[data-label="${label}"]`)?.innerText.trim() ?? "";
 

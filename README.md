@@ -13,6 +13,9 @@ lokaler), der gør siden **Tider** (`/tider`, mine bookinger) til at bruge:
   når alle er det samme sted), er skjult.
 - **Knapperne fremme:** "Rediger" og "Forny" står direkte i rækken i stedet for i menuen ude til højre. "Forny" er
   fremhævet, så det er tydeligt, hvilke tider der kan fornyes.
+- **Virker Forny?** Book Byen viser "Dette link er udløbet" for nogle fornyelser. Scriptet henter fornyelsessiden i
+  baggrunden (kun visning, intet bookes): virker den, står der fx "Forny til 30. mar" med periode og pris, når
+  musen holdes over knappen; ellers er knappen grå og hedder "Kan ikke fornys". Svaret huskes et kvarter i fanen.
 - Alle rækker vises på én side.
 
 Scriptet ændrer kun visningen i min egen browser. Det sender intet og klikker ikke på noget af sig selv; knapperne
@@ -41,5 +44,7 @@ Farver: grundfarven (hue) pr. ugedag står i `HUES`; banen drejer farven 20° og
 
 ## Historik
 
+- 1.1.0 (16. oktober 2026): Forny-knappen tjekker, om linket virker, og viser hvortil der fornyes; datoer som
+  "30. mar".
 - 1.0.0 (16. oktober 2026): sortering, farver pr. ugedag og bane, ugedag, kort bane, antal uger, knapper i rækken,
   ingen vandret scroll.
