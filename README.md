@@ -22,8 +22,12 @@ gør det samme som menupunkterne.
 
 1. Installér [Tampermonkey](https://www.tampermonkey.net/) i Chrome (eller Violentmonkey). I Chrome og Edge skal
    "Tillad brugerscripts" være slået til under udvidelsens detaljer.
-2. Åbn `bookbyen-tider.user.js` og installér det (eller opret et nyt script i Tampermonkey og indsæt indholdet).
+2. Åbn **[installationslinket](https://raw.githubusercontent.com/kekwin/bookbyen-userscript/main/bookbyen-tider.user.js)**
+   og tryk "Installér" i Tampermonkey.
 3. Gå til Book Byen, log ind og åbn **Tider**.
+
+Tampermonkey tjekker selv for opdateringer (samme adresse). En ny version skal have et højere `@version` i
+scriptets hoved; ellers henter Tampermonkey den ikke.
 
 ## Sådan virker det
 
