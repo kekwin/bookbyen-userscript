@@ -54,6 +54,8 @@
     #${TABLE_ID}.bb .bb-actions { display: flex; gap: 6px; }
     #${TABLE_ID}.bb .bb-actions button { font: inherit; font-size: 0.85em; padding: 3px 10px; border-radius: 6px; border: 1px solid #999; background: #fff; cursor: pointer; text-decoration: none; }
     #${TABLE_ID}.bb .bb-actions button.bb-renew { background: #1f3f9a; border-color: #1f3f9a; color: #fff; font-weight: 600; }
+    #${TABLE_ID}.bb .bb-actions button.bb-renew.bb-checking { opacity: 0.55; }
+    #${TABLE_ID}.bb .bb-actions button.bb-renew.bb-dead { background: #eee; border-color: #ccc; color: #777; font-weight: 400; cursor: not-allowed; }
     #${TABLE_ID}.bb td[data-label="BookingDate"], #${TABLE_ID}.bb td[data-label="bookingcode"] { text-align: left !important; }
     #${TABLE_ID}.bb .bb-hidden { display: none !important; }
     .table-responsive:has(> #${TABLE_ID}.bb) { overflow-x: visible; }
@@ -119,6 +121,76 @@
     tr.style.setProperty("--bb-bg", `hsl(${hue} 70% ${93 - step * 5}%)`);
     tr.style.setProperty("--bb-line", `hsl(${hue} 45% ${80 - step * 5}%)`);
     tr.style.setProperty("--bb-strong", `hsl(${hue} 65% ${45 - step * 5}%)`);
+  };
+
+  // Forny-links: for nogle tider viser Book Byen "Dette link er udløbet" i stedet for fornyelsen. Siden hentes i
+  // baggrunden (kun visning, intet bookes): har den tider at booke, virker linket, ellers ikke. Svaret huskes i
+  // et kvarter i fanen, så siden ikke hentes igen ved hver genindlæsning.
+  const RENEW_CACHE = "bbTiderRenew";
+  const RENEW_TTL = 15 * 60_000;
+  const renewCache = () => {
+    try {
+      return JSON.parse(sessionStorage.getItem(RENEW_CACHE) ?? "{}");
+    } catch {
+      return {};
+    }
+  };
+  const checkRenew = async (url) => {
+    const cache = renewCache();
+    const hit = cache[url];
+    if (hit && Date.now() - hit.at < RENEW_TTL) return hit.result;
+    const res = await fetch(url, { credentials: "same-origin" });
+    if (!res.ok) throw new Error(`svarede ${res.status}`);
+    const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+    const box = doc.querySelector("input[class*='clsCHKMultiBooking']");
+    let result = { ok: false };
+    if (box) {
+      try {
+        const slot = JSON.parse(box.value);
+        const [from, to] = String(slot.currentDateStr ?? "").split(" - ");
+        result = { ok: true, start: from ?? "", end: to ?? "", price: slot.hourPriceWithVATFinal ?? null, availability: slot.availabilityPercentage ?? null };
+      } catch {
+        result = { ok: true };
+      }
+    }
+    cache[url] = { at: Date.now(), result };
+    try {
+      sessionStorage.setItem(RENEW_CACHE, JSON.stringify(cache));
+    } catch {
+      /* privat vindue */
+    }
+    return result;
+  };
+
+  /** Viser på Forny-knappen, om linket virker, og i så fald til hvornår. Ved fejl i tjekket bliver knappen som den var. */
+  const markRenew = async (button, url) => {
+    button.classList.add("bb-checking");
+    try {
+      const r = await checkRenew(url);
+      if (!r.ok) {
+        button.classList.add("bb-dead");
+        button.disabled = true;
+        button.textContent = "Kan ikke fornys";
+        button.title = 'Book Byen svarer "Dette link er udløbet" for denne tid. Book i stedet en ny fast banetid, når datoen kan bookes.';
+        return;
+      }
+      const start = parseDate(r.start ?? "");
+      const end = parseDate(r.end ?? "");
+      if (!start || !end) return;
+      const weeks = Math.round((end - start) / (7 * 864e5)) + 1;
+      button.textContent = `Forny til ${shortDate(end)}`;
+      button.title = [
+        `Forny ${shortDate(start)} – ${shortDate(end)} ${end.getFullYear()} (${weeks} uger)`,
+        r.price != null && `${Number(r.price).toLocaleString("da-DK")} kr.`,
+        r.availability != null && r.availability < 100 && `kun ${r.availability} % ledig`,
+      ]
+        .filter(Boolean)
+        .join(", ");
+    } catch {
+      /* tjekket fejlede: knappen virker som før */
+    } finally {
+      button.classList.remove("bb-checking");
+    }
   };
 
   const compare = (a, b) => {
@@ -197,6 +269,7 @@
     }
 
     // Handling: menupunkterne som knapper i stedet for en menu ude til højre. Knappen klikker på det oprindelige punkt.
+    const renewChecks = [];
     for (const r of rows) {
       const td = r.tr.querySelector('td[data-label="Redigér"]');
       const items = td ? [...td.querySelectorAll("li[onclick]")] : [];
@@ -209,13 +282,19 @@
         button.type = "button";
         button.textContent = /forny/i.test(text) ? "Forny" : /rediger/i.test(text) ? "Rediger" : text;
         button.title = text;
-        if (/forny/i.test(text)) button.className = "bb-renew";
         button.addEventListener("click", () => li.click());
+        const url = /location\.href='([^']+)'/.exec(li.getAttribute("onclick") ?? "")?.[1];
+        if (/forny/i.test(text)) {
+          button.className = "bb-renew";
+          if (url) renewChecks.push(() => markRenew(button, url.replace(/&amp;/g, "&")));
+        }
         box.append(button);
       }
       for (const child of td.children) child.classList.add("bb-hidden");
       td.append(box);
     }
+    // Én ad gangen, så Book Byen ikke får alle kald på én gang.
+    renewChecks.reduce((p, check) => p.then(check), Promise.resolve());
 
     // Kolonner: skjul de overflødige, og dem der er ens i alle rækker, hvor det er valgt.
     const hidden = new Set(HIDDEN);
