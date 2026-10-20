@@ -5,6 +5,7 @@
 // @description  Sortérbare kolonner, farve pr. ugedag og bane, ugedag-kolonne, uden vandret scroll og med knapperne fremme på Book Byens "Tider"-side.
 // @match        https://www.bookbyen.brnd.com/tider*
 // @match        https://bookbyen.brnd.com/tider*
+// @license      MIT
 // @homepageURL  https://github.com/kekwin/bookbyen-userscript
 // @updateURL    https://raw.githubusercontent.com/kekwin/bookbyen-userscript/main/bookbyen-tider.user.js
 // @downloadURL  https://raw.githubusercontent.com/kekwin/bookbyen-userscript/main/bookbyen-tider.user.js

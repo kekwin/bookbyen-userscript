@@ -72,3 +72,7 @@ En ny version skal have et højere `@version` i scriptets hoved; ellers henter T
   skrives som "30. mar".
 - **1.0.0** (16. oktober 2026): Sortering, farver efter ugedag og bane, ugedag, kort banenavn, antal uger,
   knapper i rækken og ingen vandret scroll.
+
+## Licens
+
+[MIT](LICENSE).
